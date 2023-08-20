@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Real-time-chat-app</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body style="background: linear-gradient(rgb(199, 199, 241), rgb(225, 186, 147)); min-height: 100vh;">
+    <div>
+        <h1 class="d-flex justify-content-center my-4">Real time chat app</h1>
+
+        <div id="messageArea"
+            style="  max-width: 600px; border: 2px solid black; border-radius: 13px; margin: auto; height: 60vh; padding: 33px; overflow-y: auto; margin-bottom: 23px;">
+        </div>
+
+        <div class="controls d-flex justify-content-center">
+            <form action="#" id="form">
+                <div>
+                    Message : <input type="text" 
+                        style="height: 40px; width: 500px; border: 2px solid black; border-radius: 5px;" name="message"
+                        id="message">
+                    <button id="send"  type="submit" style="border: 2px solid black;">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</body>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    let socket = io();
+    let form = document.getElementById('form');
+    let message = document.getElementById('message');
+    let messageArea = document.getElementById("messageArea");
+
+    const name = prompt("Enter your name to join the chat");
+    socket.emit('new-user-joined', name);
+
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        if (message.value) {
+            socket.emit('send message', message.value);
+            message.value = "";
+        }
+    });
+
+// show the message of user to everyone.
+    socket.on("send", (data) => {
+        let chatContent = document.createElement("p");
+        chatContent.textContent = data.name + ': ' + data.message;
+        messageArea.appendChild(chatContent);
+    });
+
+//If new user joined, show the message to other.
+    socket.on('user-joined', function (data) {
+        let chatContent = document.createElement("P");
+        chatContent.textContent = data.description;
+        messageArea.appendChild(chatContent);
+    })
+
+    // If user left the chat, show the message to other.
+    socket.on('left', function (data) {
+        let chatContent = document.createElement("p");
+        chatContent.textContent = data.description;
+        messageArea.appendChild(chatContent);
+    })
+
+
+
+</script>
+
+</html>
